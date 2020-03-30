@@ -4,8 +4,10 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import { ShoppingBasket } from 'commerce/data';
+import { useMutation, useQuery } from '@lwce/apollo-client';
+import { GET_BASKET, UPDATE_BASKET } from 'commerce/data';
 
 export default class Basket extends LightningElement {
     @track products = [];
@@ -16,29 +18,18 @@ export default class Basket extends LightningElement {
         return this.products.length > 0;
     }
 
-    constructor() {
-        super();
-    }
-
     get shippingMethods() {
         let shippingMethods =
             ShoppingBasket.basket.shippingMethods.applicableShippingMethods;
         return this.filterStorePickupShippingMethods(shippingMethods);
     }
 
-    filterStorePickupShippingMethods(shippingMethods) {
-        // Filter/Remove all Store Pickup Enabled Shipping Methods
-        var filteredMethods = [];
-        shippingMethods.forEach(shippingMethod => {
-            if (!shippingMethod.c_storePickupEnabled) {
-                filteredMethods.push(shippingMethod);
-            }
-        });
-        return filteredMethods;
-    }
-
     get selectedShippingMethodId() {
         return ShoppingBasket.basket.selectedShippingMethodId;
+    }
+
+    constructor() {
+        super();
     }
 
     connectedCallback() {
@@ -51,6 +42,32 @@ export default class Basket extends LightningElement {
             .catch(error => {
                 console.log('error received ', error);
             });
+    }
+
+    @wire(useQuery, {
+        query: GET_BASKET,
+        lazy: true,
+    })
+    getBasket;
+
+    @wire(useMutation, {
+        mutation: UPDATE_BASKET,
+    })
+    updateBasket;
+
+    renderedCallback() {
+        console.log('getBasket: ', this.getBasket);
+    }
+
+    filterStorePickupShippingMethods(shippingMethods) {
+        // Filter/Remove all Store Pickup Enabled Shipping Methods
+        var filteredMethods = [];
+        shippingMethods.forEach(shippingMethod => {
+            if (!shippingMethod.c_storePickupEnabled) {
+                filteredMethods.push(shippingMethod);
+            }
+        });
+        return filteredMethods;
     }
 
     removeHandler(event) {

@@ -10,6 +10,94 @@
 import { apiClient } from '../api/client';
 import gql from 'graphql-tag';
 
+const getBasketAttributes = `basketId
+            customerId
+            getBasketMessage
+            totalProductsQuantity
+            shipmentId
+            shipmentTotal
+            selectedShippingMethodId
+            products {
+                productId
+                itemId
+                quantity
+            productName
+            price
+            image
+        }
+        orderTotal
+        orderLevelPriceAdjustment {
+            itemText
+            price
+        }
+        shippingTotal
+        shippingTotalTax
+        taxation
+        taxTotal
+        shippingMethods {
+            defaultShippingMethodId
+            applicableShippingMethods {
+                id
+                name
+                description
+                price
+                c_estimatedArrivalTime
+                c_storePickupEnabled
+            }
+        }`;
+
+export const GET_BASKET = gql`
+query {
+    getBasket {
+        ${getBasketAttributes}
+    }
+}`;
+
+export const ADD_TO_BASKET = gql`
+    mutation addProductToBasket($productId: String!, $quantity: Int!) {
+        addProductToBasket(productId: $productId, quantity: $quantity) {
+            basketId
+            customerId
+            addProductMessage
+            getBasketMessage
+            totalProductsQuantity
+            products {
+                productId
+                itemId
+                quantity
+                productName
+                price
+            }
+        }
+    }
+`;
+
+export const UPDATE_BASKET = gql`
+    mutation updateShippingMethod(
+        $basketId: String!
+        $shipmentId: String!
+        $shippingMethodId: String!
+    ) {
+        updateShippingMethod(
+            basketId: $basketId
+            shipmentId: $shipmentId
+            shippingMethodId: $shippingMethodId
+        ) {
+            basketId
+            shipmentId
+            shippingMethodId
+        }
+    }
+`;
+
+export const REMOVE_ITEM_FROM_BASKET = gql`
+    mutation removeItemFromBasket($productId: String!) {
+        removeItemFromBasket(productId: $productId) {
+            productId
+        }
+    }
+`;
+
 class Basket {
     basket = {};
 
