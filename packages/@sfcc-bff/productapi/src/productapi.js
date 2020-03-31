@@ -15,7 +15,9 @@ import {
     productSearchResolver,
 } from './api';
 
-export default class ProductAPI {
+export { Product } from './api/models/Product';
+
+export class ProductAPI {
     constructor(core) {
         this.core = core;
         this.core.logger.log('ProductAPI.constructor(core)');

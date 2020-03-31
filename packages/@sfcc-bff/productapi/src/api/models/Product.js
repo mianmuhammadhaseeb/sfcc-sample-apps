@@ -201,7 +201,7 @@ const getPrices = apiProduct => {
     return prices;
 };
 
-class Product {
+export class Product {
     constructor(apiProduct, userSelectedColor) {
         this.id = apiProduct.id;
         this.name = apiProduct.name;
@@ -231,5 +231,3 @@ class Product {
         this.prices = getPrices(apiProduct);
     }
 }
-
-export default Product;

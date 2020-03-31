@@ -172,9 +172,9 @@ export type AppContext = PassportContext<User, AuthenParams> & {
     setSessionProperty: (prop: string, value?: string) => void;
 };
 
-export async function getUserFromContext(context: AppContext) {
+export async function getUserFromContext(context: AppContext, refresh = false) {
     let user = context.getUser();
-    const token = user ? user.token : '';
+    const token = user && !refresh ? user.token : '';
     if (!token) {
         const res = await context.authenticate('graphql-local', { token });
         context.login(res.user);
@@ -182,3 +182,54 @@ export async function getUserFromContext(context: AppContext) {
     }
     return user;
 }
+
+/**
+ * Return true if the current API authorizaion token has expired.
+ * TODO: check with SDK team for token expire specific error.
+ * @param response
+ */
+const isTokenExpire = response => {
+    logger.info('Authorization Token has expired', response);
+
+    // response.token === 0
+    return response && response.statusText === 'Unauthorized';
+};
+
+let allowTokenRetry = true;
+let tokenTimer;
+const FIFTEEN_MINUTES = 1000 * 60 * 15;
+
+/**
+ * Request new token and retry the request call if the auth token is expired.
+ *
+ * @param requestCall   The request call used by a resolver.
+ *                      It must take and pass a refresh boolean to its dependent methods.
+ */
+export const requestWithTokenRefresh = async requestCall => {
+    try {
+        return await requestCall(false);
+    } catch (error) {
+        // only allow retry once every 15 minutes
+        if (isTokenExpire(error.response) && allowTokenRetry) {
+            // allow token retry in 15 minutes
+            if (tokenTimer) {
+                clearTimeout(tokenTimer);
+            }
+
+            // 15 minutes in milliseconds
+            tokenTimer = setTimeout(() => {
+                allowTokenRetry = true;
+                logger.info('Allow Authorization Token Request reset to true.');
+            }, FIFTEEN_MINUTES);
+
+            logger.info(
+                'Request new Authorization Token and rerun query/mutation.',
+            );
+            allowTokenRetry = false;
+            return await requestCall(true);
+        } else {
+            logger.error('Error in requestWithTokenRefresh()', error);
+            throw error;
+        }
+    }
+};

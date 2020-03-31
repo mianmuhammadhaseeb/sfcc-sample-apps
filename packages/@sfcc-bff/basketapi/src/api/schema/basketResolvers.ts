@@ -7,17 +7,25 @@
 import apollo from 'apollo-server';
 import Basket from '../models/Basket';
 import { getCommerceClientConfig } from '@sfcc-core/apiconfig';
-import { getUserFromContext, AppContext } from '@sfcc-core/core-graphql';
+import {
+    getUserFromContext,
+    AppContext,
+    requestWithTokenRefresh,
+} from '@sfcc-core/core-graphql';
 import CommerceSdk from 'commerce-sdk';
 import { core, Config } from '@sfcc-core/core';
 
 const { ApolloError } = apollo;
 const logger = core.logger;
 
-const getBasketClient = async (config: Config, context: AppContext) => {
+const getBasketClient = async (
+    config: Config,
+    context: AppContext,
+    refresh = false,
+) => {
     const clientConfig = getCommerceClientConfig(config);
     clientConfig.headers.authorization =
-        (await getUserFromContext(context))?.token ?? '';
+        (await getUserFromContext(context, refresh))?.token ?? '';
 
     return new CommerceSdk.Checkout.ShopperBaskets(clientConfig);
 };
@@ -29,27 +37,48 @@ const getProductClient = async (config: Config, context: AppContext) => {
     return new CommerceSdk.Product.ShopperProducts(clientConfig);
 };
 
+/**
+ * Get a basketId from the session or the server.
+ * @param basketClient commerce sdk for basket API calls.
+ * @param context data needed for graphql-passport session handling
+ * @param refresh request a new basket when true
+ */
+const getBasketId = async (basketClient, context, refresh = false) => {
+    let basketId = context.getSessionProperty('basketId');
+    if (!basketId || refresh) {
+        let customerBasket = await basketClient.createBasket({
+            body: {},
+        });
+        context.setSessionProperty(
+            'basketId',
+            customerBasket.basketId as string,
+        );
+        basketId = customerBasket.basketId as string;
+    }
+    return basketId;
+};
+
+/**
+ * Add a product of quantity count to a Shopping Basket.
+ * @param productId
+ * @param quantity
+ * @param config
+ * @param context
+ * @param refresh
+ */
 const addProductToBasket = async (
     productId: string,
     quantity: number,
     config: Config,
     context: AppContext,
 ) => {
-    const basketClient = await getBasketClient(config, context);
-    let basketId = context.getSessionProperty('basketId');
-    if (!basketId) {
-        let customerBasket = await basketClient.createBasket({
-            body: {},
+    return requestWithTokenRefresh(async refresh => {
+        const basketClient = await getBasketClient(config, context, refresh);
+        let basketId = await getBasketId(basketClient, context, refresh);
+        return await basketClient.addItemToBasket({
+            parameters: { basketId },
+            body: [{ productId, quantity }],
         });
-        context.setSessionProperty('basketId', customerBasket.basketId);
-        basketId = customerBasket.basketId as string;
-    }
-
-    return basketClient.addItemToBasket({
-        parameters: {
-            basketId: basketId,
-        },
-        body: [{ productId: productId, quantity: quantity }],
     });
 };
 
@@ -213,6 +242,8 @@ const updateShippingMethod = async (
     config: Config,
     context: AppContext,
 ) => {
+    // TODO: should we handle this case when the auth token needs refresh?
+    // TODO: There will be empty basket and no items in cart.
     const basketId = context.getSessionProperty('basketId');
     if (!basketId) {
         return {
