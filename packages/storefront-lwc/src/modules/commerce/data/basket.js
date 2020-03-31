@@ -85,15 +85,15 @@ export const UPDATE_BASKET = gql`
         ) {
             basketId
             shipmentId
-            shippingMethodId
+            selectedShippingMethodId
         }
     }
 `;
 
 export const REMOVE_ITEM_FROM_BASKET = gql`
-    mutation removeItemFromBasket($productId: String!) {
-        removeItemFromBasket(productId: $productId) {
-            productId
+    mutation removeItemFromBasket($itemId: String!) {
+        removeItemFromBasket(itemId: $itemId) {
+            ${getBasketAttributes}
         }
     }
 `;

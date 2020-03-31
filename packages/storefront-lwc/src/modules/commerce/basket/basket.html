@@ -63,7 +63,7 @@
                 </div>
                 <div class="col-sm-3 text-center">
                     <h2 class="number-of-items">
-                        {basket.totalProductsQuantity} Items
+                        {activeBasket.totalProductsQuantity} Items
                     </h2>
                 </div>
                 <div class="col-sm-5 text-right hidden-xs-down">
@@ -196,7 +196,7 @@
 
                     <commerce-shippingmethods shipping-label="Shipping" shipping-methods={shippingMethods} selected-shipping-method-id={selectedShippingMethodId}></commerce-shippingmethods>
 
-                    <commerce-basket-totals></commerce-basket-totals>
+                    <commerce-basket-totals basket={activeBasket}></commerce-basket-totals>
 
                     <div class="row">
                         <div class="col-12 checkout-continue">
@@ -214,7 +214,5 @@
 
             </div>
         </div>
-
-
     </div>
 </template>

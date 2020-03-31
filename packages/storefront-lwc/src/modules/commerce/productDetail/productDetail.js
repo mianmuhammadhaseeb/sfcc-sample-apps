@@ -5,14 +5,14 @@
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
 import { LightningElement, api, wire } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
+// import { ShoppingBasket } from 'commerce/data';
 import { canAddToBasket } from './product.helper.js';
 import { useMutation, useQuery } from '@lwce/apollo-client';
 import '../api/client';
 import QUERY from './gqlQuery';
 
 import { ADD_TO_BASKET } from 'commerce/data';
-import Basket from '../basket/basket.js';
+// import Basket from '../basket/basket.js';
 
 /**
  * A product detail component is an interactive component which fetches and displays details about a product.

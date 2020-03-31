@@ -4,63 +4,37 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement, track, wire } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
+import { LightningElement, api, track, wire } from 'lwc';
 import { useMutation, useQuery } from '@lwce/apollo-client';
-import { GET_BASKET, UPDATE_BASKET } from 'commerce/data';
+import { GET_BASKET, REMOVE_ITEM_FROM_BASKET } from 'commerce/data';
 
 export default class Basket extends LightningElement {
-    @track products = [];
+    products = [];
     loading = true;
-    basket = {};
+    @api activeBasket = [];
+
+    @wire(useQuery, {
+        query: GET_BASKET,
+        lazy: false,
+    })
+    getActiveBasket(response) {
+        if (!response.loading && response.data && response.data.getBasket) {
+            this.activeBasket = response.data.getBasket || [];
+            this.shippingMethods = this.filterStorePickupShippingMethods(
+                this.activeBasket.shippingMethods.applicableShippingMethods,
+            );
+            this.selectedShippingMethodId = this.activeBasket.selectedShippingMethodId;
+            this.products = this.activeBasket.products;
+            this.loading = false;
+        }
+    }
 
     get hasProducts() {
         return this.products.length > 0;
     }
 
-    get shippingMethods() {
-        let shippingMethods =
-            ShoppingBasket.basket.shippingMethods.applicableShippingMethods;
-        return this.filterStorePickupShippingMethods(shippingMethods);
-    }
-
-    get selectedShippingMethodId() {
-        return ShoppingBasket.basket.selectedShippingMethodId;
-    }
-
-    constructor() {
-        super();
-    }
-
-    connectedCallback() {
-        ShoppingBasket.getCurrentBasket()
-            .then(basket => {
-                this.basket = basket;
-                this.products = basket.products ? basket.products : [];
-                this.loading = false;
-            })
-            .catch(error => {
-                console.log('error received ', error);
-            });
-    }
-
-    @wire(useQuery, {
-        query: GET_BASKET,
-        lazy: true,
-    })
-    getBasket;
-
-    @wire(useMutation, {
-        mutation: UPDATE_BASKET,
-    })
-    updateBasket;
-
-    renderedCallback() {
-        console.log('getBasket: ', this.getBasket);
-    }
-
+    // Filter/Remove all Store Pickup Enabled Shipping Methods
     filterStorePickupShippingMethods(shippingMethods) {
-        // Filter/Remove all Store Pickup Enabled Shipping Methods
         var filteredMethods = [];
         shippingMethods.forEach(shippingMethod => {
             if (!shippingMethod.c_storePickupEnabled) {
@@ -70,15 +44,15 @@ export default class Basket extends LightningElement {
         return filteredMethods;
     }
 
+    @wire(useMutation, {
+        mutation: REMOVE_ITEM_FROM_BASKET,
+    })
+    removeItem;
+
     removeHandler(event) {
         const itemId = event.srcElement.getAttribute('data-itemid');
-        ShoppingBasket.removeItemFromBasket(itemId)
-            .then(basket => {
-                this.basket = basket;
-                this.products = basket.products ? basket.products : [];
-            })
-            .catch(error => {
-                console.error('error received ', error);
-            });
+        const variables = { itemId };
+        this.removeItem.mutate({ variables });
+        this.loading = false;
     }
 }
