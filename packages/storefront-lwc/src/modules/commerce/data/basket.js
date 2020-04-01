@@ -147,113 +147,113 @@ class Basket {
      */
 
     // TODO : wire up the UI quantity selector to pass in quantity to add
-    addToBasket(product, qty) {
-        let pid = product.id;
-        return apiClient
-            .mutate({
-                mutation: gql`
-                mutation {
-                    addProductToBasket(productId: "${pid}", quantity: ${qty}) {
-                      basketId
-                      customerId
-                      addProductMessage
-                      getBasketMessage
-                      totalProductsQuantity
-                      products {
-                        productId
-                        itemId
-                        quantity
-                        productName
-                        price
-                      }
-                }
-            }
-             `,
-            })
-            .then(result => {
-                this.basket = result.data.addProductToBasket;
-                this.isBasketLoaded = true;
-                this.updateBasket('add-to-basket');
-                return this.basket;
-            })
-            .catch(error => {
-                console.error('addToBasket failed with message', error);
-                this.updateBasket('failed-add-to-basket');
-                return this.basket;
-            });
-    }
+    // addToBasket(product, qty) {
+    //     let pid = product.id;
+    //     return apiClient
+    //         .mutate({
+    //             mutation: gql`
+    //             mutation {
+    //                 addProductToBasket(productId: "${pid}", quantity: ${qty}) {
+    //                   basketId
+    //                   customerId
+    //                   addProductMessage
+    //                   getBasketMessage
+    //                   totalProductsQuantity
+    //                   products {
+    //                     productId
+    //                     itemId
+    //                     quantity
+    //                     productName
+    //                     price
+    //                   }
+    //             }
+    //         }
+    //          `,
+    //         })
+    //         .then(result => {
+    //             this.basket = result.data.addProductToBasket;
+    //             this.isBasketLoaded = true;
+    //             this.updateBasket('add-to-basket');
+    //             return this.basket;
+    //         })
+    //         .catch(error => {
+    //             console.error('addToBasket failed with message', error);
+    //             this.updateBasket('failed-add-to-basket');
+    //             return this.basket;
+    //         });
+    // }
 
-    updateShippingMethod(basketId, shipmentId, shippingMethodId) {
-        return apiClient
-            .mutate({
-                mutation: gql`
-                    mutation {
-                        updateShippingMethod(basketId: "${basketId}", shipmentId: "${shipmentId}", shippingMethodId: "${shippingMethodId}") {
-                            basketId
-                            customerId
-                            getBasketMessage
-                            totalProductsQuantity
-                            shipmentId
-                            shipmentTotal
-                            selectedShippingMethodId
-                            products {
-                                productId
-                                itemId
-                                quantity
-                                productName
-                                price
-                            }
-                            orderTotal
-                            orderLevelPriceAdjustment {
-                                itemText
-                                price
-                            }
-                            shippingTotal
-                            shippingTotalTax
-                            taxation
-                            taxTotal
-                        }
-                    }
-                 `,
-            })
-            .then(result => {
-                this.basket = result.data.updateShippingMethod;
-                return this.basket;
-            })
-            .catch(error => {
-                console.error(
-                    'Update Shipping Method failed with message',
-                    error,
-                );
-                return this.basket;
-            });
-    }
+    // updateShippingMethod(basketId, shipmentId, shippingMethodId) {
+    //     return apiClient
+    //         .mutate({
+    //             mutation: gql`
+    //                 mutation {
+    //                     updateShippingMethod(basketId: "${basketId}", shipmentId: "${shipmentId}", shippingMethodId: "${shippingMethodId}") {
+    //                         basketId
+    //                         customerId
+    //                         getBasketMessage
+    //                         totalProductsQuantity
+    //                         shipmentId
+    //                         shipmentTotal
+    //                         selectedShippingMethodId
+    //                         products {
+    //                             productId
+    //                             itemId
+    //                             quantity
+    //                             productName
+    //                             price
+    //                         }
+    //                         orderTotal
+    //                         orderLevelPriceAdjustment {
+    //                             itemText
+    //                             price
+    //                         }
+    //                         shippingTotal
+    //                         shippingTotalTax
+    //                         taxation
+    //                         taxTotal
+    //                     }
+    //                 }
+    //              `,
+    //         })
+    //         .then(result => {
+    //             this.basket = result.data.updateShippingMethod;
+    //             return this.basket;
+    //         })
+    //         .catch(error => {
+    //             console.error(
+    //                 'Update Shipping Method failed with message',
+    //                 error,
+    //             );
+    //             return this.basket;
+    //         });
+    // }
 
-    removeItemFromBasket(itemId) {
-        return apiClient
-            .mutate({
-                mutation: gql`
-                    mutation {
-                        removeItemFromBasket(itemId: "${itemId}") {
-                            ${this.getBasketAttributes}
-                        }
-                }
-             `,
-            })
-            .then(result => {
-                this.basket = result.data.removeItemFromBasket;
-                this.isBasketLoaded = true;
-                this.updateBasket('update-basket-totals');
-                return this.basket;
-            })
-            .catch(error => {
-                console.error(
-                    'removeItemFromBasket failed with message',
-                    error,
-                );
-                return this.basket;
-            });
-    }
+    // removeItemFromBasket(itemId) {
+    //     return apiClient
+    //         .mutate({
+    //             mutation: gql`
+    //                 mutation {
+    //                     removeItemFromBasket(itemId: "${itemId}") {
+    //                         ${this.getBasketAttributes}
+    //                     }
+    //             }
+    //          `,
+    //         })
+    //         .then(result => {
+    //             this.basket = result.data.removeItemFromBasket;
+    //             this.isBasketLoaded = true;
+    //             this.updateBasket('update-basket-totals');
+    //             return this.basket;
+    //         })
+    //         .catch(error => {
+    //             console.error(
+    //                 'removeItemFromBasket failed with message',
+    //                 error,
+    //             );
+    //             return this.basket;
+    //         });
+    // }
 
     /**
      * Execute each handler registered
@@ -271,44 +271,44 @@ class Basket {
      * if first time landing the page, call getCurrentBasket()
      * @returns {quantity} for miniBasket to display
      */
-    getBasketQuantity() {
-        if (!this.isBasketLoaded) {
-            this.getCurrentBasket();
-        }
-        return this.basket.totalProductsQuantity || 0;
-    }
+    // getBasketQuantity() {
+    //     if (!this.isBasketLoaded) {
+    //         this.getCurrentBasket();
+    //     }
+    //     return this.basket.totalProductsQuantity || 0;
+    // }
 
     /**
      * Get the current basket from BFF.
      * @returns {Object} basket object
      */
-    getCurrentBasket() {
-        return apiClient
-            .query({
-                query: gql`
-                    {
-                        getBasket {
-                            ${this.getBasketAttributes}
-                        }
-                    }
-                `,
-            })
-            .then(result => {
-                this.basket = result.data.getBasket;
-                this.isBasketLoaded = true;
-                this.updateBasket('basket-loaded');
-                return this.basket;
-            })
-            .catch(error => {
-                console.warn('Warning: No basket has been created yet!', error);
-                return this.basket;
-            });
-    }
+    // getCurrentBasket() {
+    //     return apiClient
+    //         .query({
+    //             query: gql`
+    //                 {
+    //                     getBasket {
+    //                         ${this.getBasketAttributes}
+    //                     }
+    //                 }
+    //             `,
+    //         })
+    //         .then(result => {
+    //             this.basket = result.data.getBasket;
+    //             this.isBasketLoaded = true;
+    //             this.updateBasket('basket-loaded');
+    //             return this.basket;
+    //         })
+    //         .catch(error => {
+    //             console.warn('Warning: No basket has been created yet!', error);
+    //             return this.basket;
+    //         });
+    // }
 
     updateBasketListener(callback) {
         this.listeners.push(callback);
     }
 }
 
-window.basketSingleton = window.basketSingleton || new Basket();
-export const ShoppingBasket = window.basketSingleton;
+// window.basketSingleton = window.basketSingleton || new Basket();
+// export const ShoppingBasket = window.basketSingleton;

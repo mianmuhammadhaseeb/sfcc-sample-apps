@@ -11,14 +11,6 @@
         <div class="basket-error-messaging basket-error">
         </div>
 
-        <template if:true={loading}>
-            <div class='row mt-4'>
-                <div class='col-12'>
-                    <p class='text-center'>Loading Cart...</p>
-                </div>
-            </div>
-        </template>
-
         <template if:false={loading}>
             <template if:false={hasProducts}>
                 <div class="container">
@@ -53,6 +45,14 @@
             </template>
         </template>
 
+        <template if:true={loading}>
+            <div class='row mt-4'>
+                <div class='col-12'>
+                    <p class='text-center'>Loading Cart...</p>
+                </div>
+            </div>
+        </template>
+
         <div class="container" if:true={hasProducts}>
             <h1 class="page-title">Your basket</h1>
             <div class="row basket-header">
@@ -63,7 +63,7 @@
                 </div>
                 <div class="col-sm-3 text-center">
                     <h2 class="number-of-items">
-                        {activeBasket.totalProductsQuantity} Items
+                        {activeBasket.totalProductsQuantity} Item(s)
                     </h2>
                 </div>
                 <div class="col-sm-5 text-right hidden-xs-down">

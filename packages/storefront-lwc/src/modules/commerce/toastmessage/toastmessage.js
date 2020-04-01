@@ -5,7 +5,6 @@
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
 import { LightningElement, api } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
 import { messagehelper } from 'commerce/data';
 
 /**
@@ -21,9 +20,9 @@ class ToastMessage extends LightningElement {
 
     constructor() {
         super();
-        ShoppingBasket.updateBasketListener(
-            this.updateBasketHandler.bind(this),
-        );
+        // ShoppingBasket.updateBasketListener(
+        //     this.updateBasketHandler.bind(this),
+        // );
     }
 
     updateBasketHandler(eventType) {

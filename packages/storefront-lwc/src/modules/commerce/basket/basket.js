@@ -4,14 +4,14 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement, api, track, wire } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { useMutation, useQuery } from '@lwce/apollo-client';
 import { GET_BASKET, REMOVE_ITEM_FROM_BASKET } from 'commerce/data';
 
 export default class Basket extends LightningElement {
     products = [];
     loading = true;
-    @api activeBasket = [];
+    @api activeBasket;
 
     @wire(useQuery, {
         query: GET_BASKET,
@@ -52,7 +52,10 @@ export default class Basket extends LightningElement {
     removeHandler(event) {
         const itemId = event.srcElement.getAttribute('data-itemid');
         const variables = { itemId };
-        this.removeItem.mutate({ variables });
+        this.removeItem.mutate({ variables }).then(result => {
+            result = itemId;
+            console.log('results here: ', result);
+        });
         this.loading = false;
     }
 }

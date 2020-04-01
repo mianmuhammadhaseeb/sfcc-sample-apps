@@ -18,13 +18,16 @@ export default class BasketTotals extends LightningElement {
     hasShippingDiscount = false;
 
     @api basket;
-    eventChanged;
+    eventChanged = false;
+
+    local_shipmentMethodId = '';
 
     constructor() {
         super();
         window.addEventListener('update-shipping-method', e => {
             console.log('event:', e);
-            this.eventChanged = e;
+            this.local_shipmentMethodId = e.detail.shippingMethodId;
+            this.eventChanged = true;
             this.updateActiveBasket();
             this.setTotals();
         });
@@ -43,7 +46,7 @@ export default class BasketTotals extends LightningElement {
         if (this.eventChanged) {
             const basketId = this.basket.basketId;
             const shipmentId = this.basket.shipmentId;
-            const shippingMethodId = this.basket.selectedShippingMethodId;
+            const shippingMethodId = this.local_shipmentMethodId;
 
             const variables = {
                 basketId,
@@ -52,7 +55,7 @@ export default class BasketTotals extends LightningElement {
             };
 
             this.updateBasket.mutate({ variables });
-            this.eventChanged;
+            this.eventChanged = false;
         }
         return response;
     }

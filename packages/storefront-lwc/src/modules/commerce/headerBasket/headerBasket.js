@@ -4,30 +4,29 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
-
+import { LightningElement, wire } from 'lwc';
+import { GET_BASKET } from 'commerce/data';
+import { useQuery } from '@lwce/apollo-client';
 /**
  * Header basket component that should show up in the header
  */
 export default class HeaderBasket extends LightningElement {
     quantity = 0;
+    activeBasket = [];
+    listeners = [];
 
-    constructor() {
-        super();
-        ShoppingBasket.updateBasketListener(
-            this.updateBasketHandler.bind(this),
-        );
+    @wire(useQuery, {
+        query: GET_BASKET,
+        lazy: false,
+    })
+    getActiveBasket(response) {
+        if (!response.loading && response.data && response.data.getBasket) {
+            this.activeBasket = response.data.getBasket || [];
+            this.quantity = this.activeBasket.totalProductsQuantity || 0;
+        }
     }
 
     updateBasketHandler() {
-        this.quantity = ShoppingBasket.basket.totalProductsQuantity || 0;
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    renderedCallback() {}
-
-    connectedCallback() {
-        this.quantity = ShoppingBasket.basket.totalProductsQuantity || 0;
+        this.quantity = this.activeBasket.totalProductsQuantity || 0;
     }
 }
