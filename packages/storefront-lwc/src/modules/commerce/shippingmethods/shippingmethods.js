@@ -4,18 +4,38 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement, api } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
+import { LightningElement, api, wire } from 'lwc';
+// import { GET_BASKET } from 'commerce/data';
+// import { useQuery } from '@lwce/apollo-client';
 
 export default class ShippingMethods extends LightningElement {
+    @api basket;
     @api shippingLabel;
     @api shippingMethods;
     @api selectedShippingMethodId;
 
-    constructor() {
-        super();
-        this.selectedShippingMethodId =
-            ShoppingBasket.basket.selectedShippingMethodId;
+    // shipmethBasket = [];
+
+    // @wire(useQuery, {
+    //     query: GET_BASKET,
+    //     lazy: false,
+    // })
+    // getShipMethBasket(response) {
+    //     if (!response.loading && response.data && response.data.getBasket) {
+    //         console.log('response: ', response.data);
+    //         this.shipmethBasket = response.data.getBasket || [];
+    //         this.shippingMethods = this.shipmethBasket.shippingMethods;
+    //         this.selectedShippingMethodId = this.shipmethBasket.selectedShippingMethodId;
+    //         console.log(('basket - shippingMethods: ', this.shippingMethods));
+    //     }
+    // }
+
+    connectedCallback() {
+        // this.basket = Object.assign({}, this.basket);
+        // this.shippingMethods = Object.assign({}, this.basket.shippingMethods);
+        // console.log('basket - shippingMethods: ', this.shippingMethods);
+        // this.selectedShippingMethodId = this.basket.selectedShippingMethodId;
+        // this.viewShippingMethods();
     }
 
     newShippingMethod = e => {
