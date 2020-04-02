@@ -5,7 +5,6 @@
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
 import { LightningElement, api, track, wire } from 'lwc';
-// import { ShoppingBasket } from 'commerce/data';
 import { GET_BASKET, REMOVE_ITEM_FROM_BASKET } from 'commerce/data';
 import { useMutation, useQuery } from '@lwce/apollo-client';
 
@@ -29,6 +28,7 @@ export default class Basket extends LightningElement {
             this.shippingMethods = this.filterStorePickupShippingMethods(
                 this.basket.shippingMethods.applicableShippingMethods,
             );
+            this.products = this.basket.products;
             this.loading = false;
         }
     }
