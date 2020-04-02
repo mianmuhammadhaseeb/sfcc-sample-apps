@@ -83,9 +83,7 @@ export const UPDATE_BASKET = gql`
             shipmentId: $shipmentId
             shippingMethodId: $shippingMethodId
         ) {
-            basketId
-            shipmentId
-            selectedShippingMethodId
+            ${getBasketAttributes}
         }
     }
 `;

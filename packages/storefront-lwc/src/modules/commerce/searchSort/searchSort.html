@@ -6,12 +6,14 @@
 -->
 <template>
     <!-- TODO: LWC-BUG: below option selected={sortOption.selected} DOES NOT WORK. see renderedCallback() -->
-    <select class='form-control' name='sort-order' onchange={newSortRule}>
-        <template for:each={viewOptions} for:item="sort" >
-            <option key={sort.id}
-                    class={sort.id}
-                    selected={sort.selected}
-                    value={sort.id}>
+    <select class="form-control" name="sort-order" onchange="{newSortRule}">
+        <template for:each="{viewOptions}" for:item="sort">
+            <option
+                key="{sort.id}"
+                class="{sort.id}"
+                selected="{sort.selected}"
+                value="{sort.id}"
+            >
                 {sort.label}
             </option>
         </template>

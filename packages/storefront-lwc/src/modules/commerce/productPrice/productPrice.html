@@ -5,12 +5,14 @@
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 -->
 <template>
-    <div class={context}>
-        <template if:true={listPrice}>
+    <div class="{context}">
+        <template if:true="{listPrice}">
             <span class="sale-price">${salePrice}</span>
-            <span if:true={listPrice} class="strike-through">${listPrice}</span>
+            <span if:true="{listPrice}" class="strike-through"
+                >${listPrice}</span
+            >
         </template>
-        <template if:false={listPrice}>
+        <template if:false="{listPrice}">
             <span class="price">${salePrice}</span>
         </template>
     </div>

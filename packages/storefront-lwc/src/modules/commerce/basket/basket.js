@@ -4,14 +4,14 @@
     SPDX-License-Identifier: BSD-3-Clause
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { LightningElement, api, track, wire } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import { GET_BASKET, REMOVE_ITEM_FROM_BASKET } from 'commerce/data';
 import { useMutation, useQuery } from '@lwce/apollo-client';
 
 export default class Basket extends LightningElement {
-    @track products = [];
+    products = [];
     loading = true;
-    @api basket = [];
+    basket = {};
     shippingMethods = [];
     selectedShippingMethodId;
 
@@ -20,16 +20,15 @@ export default class Basket extends LightningElement {
         lazy: false,
     })
     getBasket(response) {
-        if (!response.loading && response.data && response.data.getBasket) {
-            this.basket = response.data.getBasket || [];
-            console.log('basket - basket: ', this.basket);
+        this.loading = response.loading;
+        if (response.initialized) {
+            this.basket = response.data.getBasket || {};
             this.shippingMethods = this.basket.shippingMethods.applicableShippingMethods;
             this.selectedShippingMethodId = this.basket.selectedShippingMethodId;
             this.shippingMethods = this.filterStorePickupShippingMethods(
                 this.basket.shippingMethods.applicableShippingMethods,
             );
-            this.products = this.basket.products;
-            this.loading = false;
+            this.products = [...this.basket.products];
         }
     }
 
@@ -68,7 +67,18 @@ export default class Basket extends LightningElement {
         const itemId = event.srcElement.getAttribute('data-itemid');
         const variables = { itemId };
         this.removeItemFromBasket.mutate({ variables }).then(() => {
-            this.products.pop();
+            this.basket = {
+                ...this.basket,
+                ...this.removeItemFromBasket.data.removeItemFromBasket,
+            };
+            this.products = [...this.basket.products];
         });
+    }
+
+    updateBasket(event) {
+        this.basket = {
+            ...this.basket,
+            ...event.detail.updatedBasket,
+        };
     }
 }
