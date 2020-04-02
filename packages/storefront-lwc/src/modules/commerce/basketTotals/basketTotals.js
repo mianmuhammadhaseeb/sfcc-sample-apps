@@ -12,6 +12,7 @@ export default class BasketTotals extends LightningElement {
     @api basket;
     eventChanged = false;
     local_shipmentMethodId = '';
+    tempBasket;
 
     shippingCost = 0.0;
     salesTax = 0.0;

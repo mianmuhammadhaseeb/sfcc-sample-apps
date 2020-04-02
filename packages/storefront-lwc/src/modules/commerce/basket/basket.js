@@ -5,14 +5,14 @@
     For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
 import { LightningElement, api, track, wire } from 'lwc';
-import { ShoppingBasket } from 'commerce/data';
-import { GET_BASKET } from 'commerce/data';
-import { useQuery } from '@lwce/apollo-client';
+// import { ShoppingBasket } from 'commerce/data';
+import { GET_BASKET, REMOVE_ITEM_FROM_BASKET } from 'commerce/data';
+import { useMutation, useQuery } from '@lwce/apollo-client';
 
 export default class Basket extends LightningElement {
     @track products = [];
     loading = true;
-    @api basket;
+    @api basket = [];
     shippingMethods = [];
     selectedShippingMethodId;
 
@@ -29,7 +29,6 @@ export default class Basket extends LightningElement {
             this.shippingMethods = this.filterStorePickupShippingMethods(
                 this.basket.shippingMethods.applicableShippingMethods,
             );
-            this.products = this.basket.products;
             this.loading = false;
         }
     }
@@ -38,11 +37,11 @@ export default class Basket extends LightningElement {
         return this.products.length > 0;
     }
 
-    // get shippingMethods() {
-    //     let shippingMethods = this.basket.shippingMethods
-    //         .applicableShippingMethods;
-    //     return this.filterStorePickupShippingMethods(shippingMethods);
-    // }
+    get shippingMethods() {
+        let shippingMethods = this.basket.shippingMethods
+            .applicableShippingMethods;
+        return this.filterStorePickupShippingMethods(shippingMethods);
+    }
 
     filterStorePickupShippingMethods(shippingMethods) {
         // Filter/Remove all Store Pickup Enabled Shipping Methods
@@ -55,32 +54,21 @@ export default class Basket extends LightningElement {
         return filteredMethods;
     }
 
-    // get selectedShippingMethodId() {
-    //     return this.basket.selectedShippingMethodId;
-    // }
-
-    connectedCallback() {
-        ShoppingBasket.getCurrentBasket()
-            .then(basket => {
-                this.basket = basket;
-                this.products = basket.products ? basket.products : [];
-                this.loading = false;
-            })
-            .catch(error => {
-                console.log('error received ', error);
-            });
+    get selectedShippingMethodId() {
+        return this.basket.selectedShippingMethodId;
     }
+
+    @wire(useMutation, {
+        mutation: REMOVE_ITEM_FROM_BASKET,
+        lazy: true,
+    })
+    removeItemFromBasket;
 
     removeHandler(event) {
         const itemId = event.srcElement.getAttribute('data-itemid');
-        this.basket
-            .removeItemFromBasket(itemId)
-            .then(basket => {
-                this.basket = basket;
-                this.products = basket.products ? basket.products : [];
-            })
-            .catch(error => {
-                console.error('error received ', error);
-            });
+        const variables = { itemId };
+        this.removeItemFromBasket.mutate({ variables }).then(() => {
+            this.products.pop();
+        });
     }
 }
