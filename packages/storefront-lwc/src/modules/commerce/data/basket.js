@@ -17,7 +17,8 @@ class Basket {
 
     isBasketLoaded = false;
 
-    getBasketAttributes = `basketId
+    getBasketAttributes = `
+        basketId
         customerId
         getBasketMessage
         totalProductsQuantity
@@ -79,7 +80,13 @@ class Basket {
                 c_estimatedArrivalTime
                 c_storePickupEnabled
             }
-        }`;
+        }
+        couponItems {
+            code
+            couponItemId
+            statusCode
+        }
+    `;
 
     /**
      * Calling Add to the basket BFF.

@@ -7,6 +7,7 @@
 import {
     BasketT,
     ProductItemT,
+    CouponItemT,
 } from 'commerce-sdk/dist/checkout/shopperBaskets/shopperBaskets.types';
 
 class Basket {
@@ -25,6 +26,7 @@ class Basket {
     shippingTotal: number;
     shippingTotalTax: number;
     taxTotal: number;
+    couponItems: CouponItemT[];
 
     constructor(apiBasket: BasketT) {
         this.customerId =
@@ -83,6 +85,7 @@ class Basket {
         }
 
         this.taxTotal = apiBasket.taxTotal ?? 0;
+        this.couponItems = apiBasket.couponItems ? apiBasket.couponItems : [];
     }
 }
 

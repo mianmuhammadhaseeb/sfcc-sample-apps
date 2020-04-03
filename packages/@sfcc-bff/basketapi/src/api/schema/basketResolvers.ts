@@ -54,6 +54,15 @@ const addProductToBasket = async (
     });
 };
 
+const noBasketError = () => {
+    return {
+        fault: {
+            type: 'NoBasketCreated',
+            message: 'No Basket has been created yet.',
+        },
+    };
+};
+
 const getBasketProductCount = async (config: Config, context: AppContext) => {
     let basketId = context.getSessionProperty('basketId');
     let basketProductCount = 0;
@@ -107,12 +116,7 @@ const getBasket = async (config: Config, context: AppContext) => {
     let basketId = context.getSessionProperty('basketId');
     // If No basket has been created yet, return error
     if (!basketId) {
-        return {
-            fault: {
-                type: 'NoBasketCreated',
-                message: 'No basket has been created yet.',
-            },
-        };
+        return noBasketError();
     }
     // else get basket with that id
     const basketClient = await getBasketClient(config, context);
@@ -217,12 +221,7 @@ const updateShippingMethod = async (
 ) => {
     const basketId = context.getSessionProperty('basketId');
     if (!basketId) {
-        return {
-            fault: {
-                type: 'NoBasketCreated',
-                message: 'No Basket has been created yet.',
-            },
-        };
+        return noBasketError();
     }
 
     const basketClient = await getBasketClient(config, context);
@@ -256,6 +255,54 @@ const removeItemFromBasket = async (
             logger.error(e);
         });
     return getBasket(config, context);
+};
+
+const addCouponToBasket = async (
+    couponCode: string,
+    config: Config,
+    context: AppContext,
+) => {
+    const basketId = context.getSessionProperty('basketId');
+    if (!basketId) {
+        return noBasketError();
+    }
+
+    const basketClient = await getBasketClient(config, context);
+    return basketClient
+        .addCouponToBasket({
+            parameters: {
+                basketId: basketId,
+            },
+            body: {
+                code: couponCode,
+            },
+        })
+        .catch(e => {
+            logger.error(
+                `Error in submitCouponToBasket() for coupon code: ${couponCode}`,
+            );
+            throw e;
+        });
+};
+
+const removeCouponFromBasket = async (
+    couponItemId: string,
+    config: Config,
+    context: AppContext,
+) => {
+    const basketId = context.getSessionProperty('basketId');
+    if (!basketId) {
+        return noBasketError();
+    }
+
+    const basketClient = await getBasketClient(config, context);
+
+    return basketClient.removeCouponFromBasket({
+        parameters: {
+            basketId: basketId,
+            couponItemId: couponItemId,
+        },
+    });
 };
 
 export const basketResolver = (config: Config) => {
@@ -342,6 +389,40 @@ export const basketResolver = (config: Config) => {
                     context,
                 );
                 return new Basket(apiBasket);
+            },
+            addCouponToBasket: async (
+                _: never,
+                parameters: { couponCode: string },
+                context: AppContext,
+            ) => {
+                try {
+                    const apiBasket = await addCouponToBasket(
+                        parameters.couponCode,
+                        config,
+                        context,
+                    );
+                    return new Basket(apiBasket);
+                } catch (e) {
+                    logger.error(`Error in basketResolvers(). ${e}`);
+                    throw e;
+                }
+            },
+            removeCouponFromBasket: async (
+                _: never,
+                parameters: { couponItemId: string },
+                context: AppContext,
+            ) => {
+                try {
+                    const apiBasket = await removeCouponFromBasket(
+                        parameters.couponItemId,
+                        config,
+                        context,
+                    );
+                    return new Basket(apiBasket);
+                } catch (e) {
+                    logger.error(`Error in basketResolvers(). ${e}`);
+                    throw e;
+                }
             },
         },
     };

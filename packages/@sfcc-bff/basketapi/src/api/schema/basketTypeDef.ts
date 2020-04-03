@@ -19,6 +19,8 @@ export const basketTypeDef = gql`
             shippingMethodId: String!
         ): Basket!
         removeItemFromBasket(itemId: String!): Basket!
+        addCouponToBasket(couponCode: String!): Basket!
+        removeCouponFromBasket(couponItemId: String!): Basket!
     }
     type Basket {
         basketId: String!
@@ -37,6 +39,7 @@ export const basketTypeDef = gql`
         taxation: String
         taxTotal: Float
         shippingMethods: ShippingMethods
+        couponItems: [CouponItem]
     }
     type ProductItem {
         productId: String!
@@ -83,5 +86,12 @@ export const basketTypeDef = gql`
     type OrderLevelPriceAdjustment {
         itemText: String
         price: Float
+    }
+
+    type CouponItem {
+        valid: Boolean
+        code: String!
+        couponItemId: String!
+        statusCode: String
     }
 `;
